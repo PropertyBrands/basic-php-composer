@@ -42,3 +42,14 @@ stages:
 
         - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
           artifact: drop
+      - deployment: VMDeploy
+        displayName: Web deploy
+        environment:
+          resourceType: VirtualMachine
+          name: zzz-test-environment
+          resourceName: zzz-azure-pipeline-test
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - script: echo my first deployment
