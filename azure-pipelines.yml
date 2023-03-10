@@ -55,11 +55,15 @@ stages:
           runOnce:
             preDeploy:
               steps:
-              - download: current
-                artifact: drop
-              - script: echo initialize some stuff
+              # TODO: Figure out why this breaks the download.
+              # - download: current
+              #   artifact: drop
+              - script: |
+                  sudo apt update -y
+                  sudo apt install git -y
             deploy:
               steps:
+              - checkout: self
               - script: echo my first deployment
               - script: cat /etc/os-release
               - script: ls -la
