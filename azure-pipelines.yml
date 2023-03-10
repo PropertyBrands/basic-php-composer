@@ -31,6 +31,9 @@ stages:
         - script: composer install --no-interaction --prefer-dist
           displayName: 'composer install'
 
+        - script: cat /etc/os-release
+          displayName: 'display current OS on build machine'
+
         - task: ArchiveFiles@2
           displayName: 'Archive "Archive files'
           inputs:
