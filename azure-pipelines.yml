@@ -53,3 +53,5 @@ stages:
             deploy:
               steps:
               - script: echo my first deployment
+              - script: cat /etc/os-release
+              - script: ls -la
