@@ -53,6 +53,11 @@ stages:
           resourceName: zzz-azure-pipeline-test
         strategy:
           runOnce:
+            preDeploy:
+              steps:
+              - download: current
+                artifact: drop
+              - script: echo initialize some stuff
             deploy:
               steps:
               - script: echo my first deployment
