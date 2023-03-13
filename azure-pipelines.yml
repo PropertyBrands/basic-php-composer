@@ -152,6 +152,12 @@ stages:
                 displayName: Unzip build artifact
               - script: |
                   webroot="/var/www/html/pboss"
-                  rsync -rauvL "$(Agent.WorkFolder)/$(Environment.Id)/b/$(Build.BuildId)/" "${webroot}"
+                  touch "${webroot}/vendor"
+
+                  # Copy all application files excluding the /vendor directory
+                  rsync -ravL --exclude="/vendor" "$(Agent.WorkFolder)/$(Environment.Id)/b/$(Build.BuildId)/" "${webroot}"
+
+                  # For /vendor directory, deleted any extraneous files from destination
+                  rsync -ravL -delete "$(Agent.WorkFolder)/$(Environment.Id)/b/$(Build.BuildId)/vendor/" "${webroot}/vendor"
                 displayName: Rsync files into webroot directory
 
