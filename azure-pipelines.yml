@@ -16,6 +16,8 @@ stages:
   - stage: Build
     displayName: Build stage
     jobs:
+
+      # Build variables: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
       - job: Build
         displayName: Build Job
         steps:
@@ -61,11 +63,15 @@ stages:
           runOnce:
             preDeploy:
               steps:
-              - task: DownloadPipelineArtifact@2
+              # - task: DownloadPipelineArtifact@2
               - script: |
-                  env
+                  sudo apt update -y
+                  sudo apt install unzip file -y
+                displayName: Install build dependencies
+            # Deployment steps automatically downloads build artifact.
             deploy:
               steps:
+              - checkout: self
               - script: |
                   echo "Agent Workfolder: $(Agent.WorkFolder)"
                   echo "Environment.Name: $(Environment.Name)"
@@ -79,7 +85,12 @@ stages:
                   artifact_path="$(Agent.WorkFolder)/$(Environment.Id)/${artifact_name}/$(Build.BuildId).zip"
                   echo "Artifact path: ${artifact_path}"
                 displayName: Show Azure Devops variables
-              - checkout: self
+              - script: |
+                  artifact_name="drop"
+                  artifact_path="$(Agent.WorkFolder)/$(Environment.Id)/${artifact_name}/$(Build.BuildId).zip"
+                  target_path="$(Agent.WorkFolder)/$(Environment.Id)/b/$(Build.BuildId)"
+                  unzip "${artifact_path}" -d "${target_path}"
+                displayName: Unzip build artifact
               - script: echo my first deployment
               - script: cat /etc/os-release
               - script: ls -la
