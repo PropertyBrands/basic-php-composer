@@ -160,4 +160,12 @@ stages:
                   # For /vendor directory, deleted any extraneous files from destination
                   rsync -ravL -delete "$(Agent.WorkFolder)/$(Environment.Id)/b/$(Build.BuildId)/vendor/" "${webroot}/vendor"
                 displayName: Rsync files into webroot directory
-
+            on:
+              failure:
+                steps:
+                - script: echo "There was an error during the deployment."
+              success:
+                steps:
+                - script: echo "$(Build.BuildId) was successfully deployed."
+                - script: sudo systemctl reload apache2
+                  displayName: Reload Apache gracefully
