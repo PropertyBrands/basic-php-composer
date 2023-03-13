@@ -78,6 +78,54 @@ stages:
                   sudo apt update -y
                   sudo apt install unzip file -y
                 displayName: Install build dependencies
+              - script: |
+                  ARTIFACT_RETENTION_COUNT=3
+                  ARTIFACT_DIR="$(Agent.WorkFolder)/$(Environment.Id)/drop"
+                  ARTIFACT_EXT="zip"
+
+                  # Check if artifact directory exists.
+                  if ! [[ -d "${ARTIFACT_DIR}" ]]; then
+                    echo "Artifact directory ${ARTIFACT_DIR} does not exist."
+                    exit 0
+                  fi
+
+                  # Get total number of artifact files in artifact directory.
+                  total_files="$(ls -1 "${ARTIFACT_DIR}" | grep "\.${ARTIFACT_EXT}$" | wc -l)"
+
+                  if [[ "${total_files}" -gt "${ARTIFACT_RETENTION_COUNT}" ]]; then
+                    # Sort files by date ascending and delete all but the latest ARTIFACT_RETENTION_COUNT files.
+                    head_count=$(($total_files-$ARTIFACT_RETENTION_COUNT))
+                    while read dirname; do
+                      deletion_target="${ARTIFACT_DIR}/${dirname}"
+                      echo "Deleting artifact file: ${deletion_target}"
+                      rm "${deletion_target}"
+                    done < <(ls -1tr "${ARTIFACT_DIR}" | grep "\.${ARTIFACT_EXT}$" | head -n "${head_count}")
+                  fi
+                displayName: Delete artifacts older than ARTIFACT_RETENTION_COUNT
+
+              - script: |
+                  BUILD_RETENTION_COUNT=3
+                  BUILD_DIR="$(Agent.WorkFolder)/$(Environment.Id)/b"
+
+                  # Check if build directory exists.
+                  if ! [[ -d "${BUILD_DIR}" ]]; then
+                    echo "Build directory ${BUILD_DIR} does not exist."
+                    exit 0
+                  fi
+
+                  # Get total number of build directories in build parent directory.
+                  total_build_dirs="$(ls -1 "${BUILD_DIR}" | wc -l)"
+
+                  if [[ "${total_build_dirs}" -gt "${BUILD_RETENTION_COUNT}" ]]; then
+                    # Sort directories by date ascending and delete all but the latest BUILD_RETENTION_COUNT directories.
+                    head_count=$(($total_build_dirs-$BUILD_RETENTION_COUNT))
+                    while read dirname; do
+                      deletion_target="${BUILD_DIR}/${dirname}"
+                      echo "Deleting build directory file: ${deletion_target}"
+                      rm -rf "${deletion_target}"
+                    done < <(ls -1tr "${BUILD_DIR}" | head -n "${head_count}")
+                  fi
+                displayName: Delete build directories older than BUILD_RETENTION_COUNT
             # Deployment steps automatically downloads build artifact.
             deploy:
               steps:
