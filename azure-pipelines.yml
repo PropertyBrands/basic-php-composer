@@ -43,9 +43,14 @@ stages:
             archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
             replaceExistingArchive: true
 
-        - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-          artifact: drop
+        - task: PublishPipelineArtifact@1
+          inputs:
+            targetPath: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+            artifact: drop
+        # - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        #   artifact: drop
       - deployment: VMDeploy
+        dependsOn: Build
         displayName: Web deploy
         environment:
           resourceType: VirtualMachine
@@ -55,9 +60,7 @@ stages:
           runOnce:
             preDeploy:
               steps:
-              # TODO: Figure out why this breaks the download.
-              # - download: current
-              #   artifact: drop
+              - task: DownloadPipelineArtifact@2
               - script: |
                   sudo apt update -y
                   sudo apt install git -y
