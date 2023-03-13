@@ -36,6 +36,13 @@ stages:
         - script: cat /etc/os-release
           displayName: 'display current OS on build machine'
 
+        - task: DeleteFiles@1
+          displayName: 'Remove Git directory'
+          inputs:
+            SourceFolder: '$(System.DefaultWorkingDirectory)'
+            Contents: '.git'
+            RemoveDotFiles: true
+
         - task: ArchiveFiles@2
           displayName: 'Archive "Archive files'
           inputs:
