@@ -76,7 +76,7 @@ stages:
               # - task: DownloadPipelineArtifact@2
               - script: |
                   sudo apt update -y
-                  sudo apt install unzip file -y
+                  sudo apt install unzip rsync file -y
                 displayName: Install build dependencies
               - script: |
                   ARTIFACT_RETENTION_COUNT=3
@@ -126,6 +126,7 @@ stages:
                     done < <(ls -1tr "${BUILD_DIR}" | head -n "${head_count}")
                   fi
                 displayName: Delete build directories older than BUILD_RETENTION_COUNT
+
             # Deployment steps automatically downloads build artifact.
             deploy:
               steps:
@@ -149,6 +150,8 @@ stages:
                   target_path="$(Agent.WorkFolder)/$(Environment.Id)/b/$(Build.BuildId)"
                   unzip "${artifact_path}" -d "${target_path}"
                 displayName: Unzip build artifact
-              - script: echo my first deployment
-              - script: cat /etc/os-release
-              - script: ls -la
+              - script: |
+                  webroot="/var/www/html/pboss"
+                  rsync -rauvL "$(Agent.WorkFolder)/$(Environment.Id)/b/$(Build.BuildId)/" "${webroot}"
+                displayName: Rsync files into webroot directory
+
