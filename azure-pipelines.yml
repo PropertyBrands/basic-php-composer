@@ -47,8 +47,9 @@ stages:
           inputs:
             targetPath: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
             artifact: drop
-        # - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        #   artifact: drop
+
+      # Job directories
+      # https://github.com/microsoft/azure-pipelines-agent/blob/master/docs/jobdirectories.md
       - deployment: VMDeploy
         dependsOn: Build
         displayName: Web deploy
@@ -62,10 +63,22 @@ stages:
               steps:
               - task: DownloadPipelineArtifact@2
               - script: |
-                  sudo apt update -y
-                  sudo apt install git -y
+                  env
             deploy:
               steps:
+              - script: |
+                  echo "Agent Workfolder: $(Agent.WorkFolder)"
+                  echo "Environment.Name: $(Environment.Name)"
+                  echo "Environment.Id $(Environment.Id)"
+                  echo "Environment.ResourceName: $(Environment.ResourceName)"
+                  echo "Environment.ResourceId: $(Environment.ResourceId)"
+                  echo "Strategy.Name: $(Strategy.Name)"
+                  echo "Strategy.CycleName: $(Strategy.CycleName)"
+                  echo "-------------"
+                  artifact_name="drop"
+                  artifact_path="$(Agent.WorkFolder)/$(Environment.Id)/${artifact_name}/$(Build.BuildId).zip"
+                  echo "Artifact path: ${artifact_path}"
+                displayName: Show Azure Devops variables
               - checkout: self
               - script: echo my first deployment
               - script: cat /etc/os-release
