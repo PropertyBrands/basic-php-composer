@@ -50,10 +50,13 @@ stages:
             targetPath: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
             artifact: drop
 
-      # Job directories
+  - stage: Deploy
+    displayName: Deploy stage
+    dependsOn: Build
+    jobs:
+      # Job directories on VM
       # https://github.com/microsoft/azure-pipelines-agent/blob/master/docs/jobdirectories.md
       - deployment: VMDeploy
-        dependsOn: Build
         displayName: Web deploy
         environment:
           resourceType: VirtualMachine
