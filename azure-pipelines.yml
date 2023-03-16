@@ -79,7 +79,7 @@ stages:
                   sudo apt install unzip rsync file -y
                 displayName: Install build dependencies
               - script: |
-                  ARTIFACT_RETENTION_COUNT=3
+                  ARTIFACT_RETENTION_COUNT=10
                   ARTIFACT_DIR="$(Agent.WorkFolder)/$(Environment.Id)/drop"
                   ARTIFACT_EXT="zip"
 
@@ -104,7 +104,7 @@ stages:
                 displayName: Delete artifacts older than ARTIFACT_RETENTION_COUNT
 
               - script: |
-                  BUILD_RETENTION_COUNT=3
+                  BUILD_RETENTION_COUNT=10
                   BUILD_DIR="$(Agent.WorkFolder)/$(Environment.Id)/b"
 
                   # Check if build directory exists.
